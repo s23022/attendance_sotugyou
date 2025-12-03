@@ -1,12 +1,265 @@
+/* ==========================
+   メインコンテナ
+   ========================== */
 .Main {
     width: 100%;
-    height: 950px;
+    height: 940px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-width: 1200px;
+}
+
+.admin {
+    position: absolute;
+    width: 210px;
+    height: 70px;
+    border-radius: 10px;
+    border: 5px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    right: 100px;
+    top: 200px;
+    font-size: 20px;
+}
+
+/* ==========================
+   ログインボタン
+   ========================== */
+.login {
+    position: absolute;
+    width: 200px;
+    height: 60px;
+    border-radius: 10px;
+    border: 5px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    right: 100px;
+    top: 100px;
+}
+
+/* ==========================
+   モーダル背景（一般的）
+   ========================== */
+.modalBackdrop {
+    position: absolute;
+    right: 100px;
+    top: 300px;
+    width: 500px;
+    height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 5px solid black;
+    border-radius: 10px;
+}
+
+/* ==========================
+   ログインモーダルタイトル
+   ========================== */
+.login_title {
+    position: relative;
+    bottom: 60px;
+}
+
+/* ==========================
+   ログイン入力フォーム
+   ========================== */
+.email, .password {
+    position: relative;
+    width: 340px;
+    height: 30px;
+    padding: 10px;
+}
+
+.email {
+    bottom: 60px;
+}
+.password {
+    bottom: 40px;
+}
+
+/* ==========================
+   ログインボタン
+   ========================== */
+.login_button {
+    position: relative;
+    width: 150px;
+    height: 50px;
+    border-radius: 10px;
+    border: 3px solid black;
+    bottom: 10px;
+}
+
+/* ==========================
+   登録ボタン
+   ========================== */
+.registration {
+    position: relative;
+    width: 150px;
+    height: 50px;
+    border-radius: 10px;
+    border: 3px solid black;
+    top: 10px;
+}
+
+.registration_message {
+    position: relative;
+}
+
+/* ==========================
+   モーダルコンテンツ（一般）
+   ========================== */
+.modalContent {
+    border-radius: 10px;
+    width: 500px;
+    height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    right: 100px;
+    top: 100px;
+}
+
+/* ==========================
+   登録用モーダル背景
+   ========================== */
+.registration_modalBackdrop {
+    position: absolute;
+    right: 100px;
+    top: 300px;
+    width: 500px;
+    height: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border: 5px solid black;
+    border-radius: 10px;
+    background-color: white;
+}
+
+/* ==========================
+   登録モーダルタイトル
+   ========================== */
+.registration_login_title {
+    position: relative;
+    width: 500px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    bottom: 15px;
+}
+
+/* ==========================
+   登録フォーム各種入力
+   ========================== */
+.registration_ID_number,
+.registration_email,
+.registration_password,
+.registration_name,
+.registration_department,
+.registration_cose {
+    position: relative;
+    width: 340px;
+    height: 30px;
+    padding: 10px;
+}
+
+/* ==========================
+   登録モーダルボタンまとめ
+   ========================== */
+.registration_summary {
+    position: relative;
+    width: 350px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    bottom: 20px;
+}
+
+.registration_login_button,
+.registration_close_button {
+    position: relative;
+    width: 150px;
+    height: 50px;
+    border-radius: 10px;
+    border: 3px solid black;
+}
+
+.registration_login_button {
+    right: 25px;
+}
+
+.registration_close_button {
+    left: 25px;
+}
+
+/* ==========================
+   登録モーダルのコンテンツ
+   ========================== */
+.registration_modalContent {
+    position: relative;
+    width: 440px;
+    height: 450px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    bottom: 35px;
+    overflow-y: auto;
+    padding: 100px 30px 0 30px;
+}
+
+/* ==========================
+   アプリ説明セクション
+   ========================== */
+.explanation {
+    position: absolute;
+    width: 450px;
+    height: 700px;
+    border-radius: 10px;
+    border: 5px solid black;
+    left: 100px;
+    top: 100px;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
 }
 
+.explanation_title {
+    position: relative;
+    width: 450px;
+    height: 50px;
+    font-size: 20px;
+    border-bottom: 5px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.explanation_summary {
+    position: relative;
+    width: 400px;
+    height: 680px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 0 25px;
+}
+
+/* ==========================
+   タイトル・日付・時刻表示
+   ========================== */
 .title {
     position: relative;
     display: flex;
@@ -40,6 +293,9 @@
     font-size: 50px;
 }
 
+/* ==========================
+   GPSメッセージ
+   ========================== */
 .GPS {
     position: relative;
     display: flex;
@@ -50,6 +306,9 @@
     bottom: 80px;
 }
 
+/* ==========================
+   出席ボタン
+   ========================== */
 .button_summary {
     position: relative;
     display: flex;
@@ -59,16 +318,19 @@
     height: 150px;
     bottom: 50px;
 }
+
 .attendance {
     position: relative;
     width: 300px;
     height: 150px;
-    right: 50px;
     border-radius: 10px;
     border: 3px solid black;
     font-size: 50px;
 }
 
+/* ==========================
+   終了ボタン（未使用？）
+   ========================== */
 .end {
     position: relative;
     width: 300px;
@@ -79,13 +341,31 @@
     font-size: 50px;
 }
 
-.Reason_for_absence {
-    position: relative;
-    background-color: orange;
+.user {
+    position: absolute;
     width: 300px;
-    height: 80px;
-    border-radius: 10px;
-    border: 3px solid black;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    bottom: 150px;
+}
+
+.user_name {
+    margin: 0;
+    position: relative;
     font-size: 30px;
-    top: 30px;
+}
+
+.logout {
+    position: absolute;
+    cursor: pointer;
+    color: #0070f3; /* リンクっぽい青 */
+    text-decoration: underline;
+    bottom: 120px;
+}
+
+.logout:hover {
+    opacity: 0.7;
 }

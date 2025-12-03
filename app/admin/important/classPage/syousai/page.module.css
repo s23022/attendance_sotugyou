@@ -1,0 +1,149 @@
+/* ==========================
+   メインコンテナ
+   ========================== */
+.Main {
+    width: 100%;
+    height: 940px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-width: 1200px;
+}
+
+.matome {
+    position: relative;
+    width: 1500px;
+    height: 700px;
+    border: 5px solid black;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.students_ID{
+    position: relative;
+    right: 590px;
+}
+
+.jouhou {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 1500px;
+    height: 200px;
+}
+
+.jouhou_01 {
+    position: relative;
+    width: 300px;
+    height: 100px;
+    margin-right: 10px;
+    margin-left: 10px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    font-size: 20px;
+}
+
+.M01_M06_button_summary {
+    position: relative;
+    display: flex;
+}
+
+.M07_M12_button_summary {
+    position: relative;
+    display: flex;
+}
+
+.M01_M06_behind_time {
+    position: relative;
+    display: flex;
+
+}
+
+.M07_12_behind_time {
+    position: relative;
+    display: flex;
+}
+
+.behind_time_text {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 120px;
+    height: 50px;
+    font-size: 100px;
+    margin-inline: 60px;
+}
+
+.M01_06_button {
+    position: relative;
+    width: 200px;
+    height: 90px;
+    margin-inline: 20px;
+    font-size: 30px;
+    border-radius: 10px;
+    border: 5px solid black;
+}
+
+.M07_12_button {
+    position: relative;
+    width: 200px;
+    height: 90px;
+    margin-inline: 20px;
+    font-size: 30px;
+    border-radius: 10px;
+    border: 5px solid black;
+}
+
+.return_button {
+    position: absolute;
+    width: 250px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-size:20px;
+    border-radius: 10px;
+    border: 5px solid black;
+    top: 20px;
+    right: 20px;
+}
+
+.deth {
+    position: absolute;
+    width: 250px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-size:20px;
+    border-radius: 10px;
+    border: 5px solid black;
+    top: 20px;
+    right: 300px;
+}
+
+/* 月ボタンと遅刻回数をまとめるラッパー */
+.month_block {
+    display: flex;
+    flex-direction: column; /* ボタンの下に遅刻回数を縦並び */
+    align-items: center;
+    margin: 0 1px; /* ボタン間の横スペース */
+}
+
+/* 遅刻回数テキストの調整 */
+.behind_time_text {
+    font-size: 15px;
+    margin-top: 10px; /* ボタンとの間隔 */
+    text-align: center;
+}

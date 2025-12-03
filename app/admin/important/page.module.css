@@ -1,0 +1,122 @@
+/* ==========================
+   メインコンテナ
+   ========================== */
+.Main {
+    width: 100%;
+    height: 950px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-width: 1200px;
+}
+
+.database {
+    position: relative;
+    width: 1200px;
+    height: 800px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    bottom: 30px;
+}
+
+.special_list {
+    position: relative;
+    font-size: 40px;
+    width: 1000px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border-bottom: 5px solid black;
+}
+
+.information_engineering_text {
+    position: relative;
+    font-size: 30px;
+    bottom: 30px;
+}
+
+.information_engineering_button {
+    position: relative;
+    width: 200px;
+    height: 70px;
+    margin-right: 10px;
+    margin-left: 10px;
+    border-radius: 10px;
+    border: 5px solid black;
+}
+
+.information_engineering_list {
+    position: relative;
+    width: 660px;
+    height: 70px;
+    bottom: 20px;
+}
+
+.security_text {
+    position: relative;
+    font-size: 30px;
+    bottom: 20px;
+}
+
+.security_list {
+    position: relative;
+    width: 660px;
+    height: 70px;
+    bottom: 20px;
+}
+
+.security_button {
+    position: relative;
+    width: 200px;
+    height: 70px;
+    margin-right: 10px;
+    margin-left: 10px;
+    border-radius: 10px;
+    border: 5px solid black;
+}
+
+.creator_text {
+    position: relative;
+    font-size: 40px;
+    width: 1000px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border-bottom: 5px solid black;
+    bottom: 20px;
+}
+
+.creator_list {
+    position: relative;
+    width: 660px;
+    height: 70px;
+    bottom: 10px;
+}
+
+.creator_button {
+    position: relative;
+    width: 200px;
+    height: 70px;
+    margin-right: 10px;
+    margin-left: 10px;
+    border-radius: 10px;
+    border: 5px solid black;
+}
+
+.return_button {
+    position: absolute;
+    width: 250px;
+    height: 100px;
+    top: 50px;
+    border: 5px solid black;
+    border-radius: 10px;
+    right: 25px;
+    font-size: 30px;
+}

@@ -12,6 +12,8 @@ export default function Application_page () {
     return (
         <main className={styles.Main}>
             <div className={styles.application_form}>
+
+
             </div>
             <button className={styles.return} onClick={() => router.push('/')}>戻る</button>
         </main>
