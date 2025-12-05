@@ -12,22 +12,17 @@ export async function POST(req) {
         const { email, password } = await req.json();
 
         if (!email || !password) {
-            return new Response(
-                JSON.stringify({ success: false, message: "入力不足" }),
-                { status: 400 }
-            );
+            return new Response(JSON.stringify({ success: false, message: "入力不足" }), { status: 400 });
         }
 
-        // 全テーブルを検索（s1, s2, s3, c1, c2, n1, n2）
         const tables = ["s1", "s2", "s3", "c1", "c2", "n1", "n2"];
-
         const connection = await mysql.createConnection(dbConfig);
 
         let user = null;
 
         for (const table of tables) {
             const [rows] = await connection.execute(
-                `SELECT * FROM \`${table}\` WHERE email = ? AND password = ? LIMIT 1`,
+                `SELECT student_id, name, email, password FROM \`${table}\` WHERE email = ? AND password = ? LIMIT 1`,
                 [email, password]
             );
             if (rows.length > 0) {
@@ -40,19 +35,13 @@ export async function POST(req) {
         await connection.end();
 
         if (!user) {
-            return new Response(
-                JSON.stringify({ success: false, message: "メール or パスワードが違います" }),
-                { status: 401 }
-            );
+            return new Response(JSON.stringify({ success: false, message: "メール or パスワードが違います" }), { status: 401 });
         }
 
         return new Response(JSON.stringify({ success: true, user }), { status: 200 });
 
     } catch (err) {
         console.error(err);
-        return new Response(
-            JSON.stringify({ success: false, message: err.message }),
-            { status: 500 }
-        );
+        return new Response(JSON.stringify({ success: false, message: err.message }), { status: 500 });
     }
 }

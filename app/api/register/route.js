@@ -37,13 +37,26 @@ export async function POST(req) {
         // ==========================
         const attendanceTable = `${tableName}_attendance`;
 
-        // 出席 0:欠課, 1:出席, 2:遅刻 として初期化
-        const insertAttendanceQuery = `
-            INSERT INTO \`${attendanceTable}\` 
-            (student_id, date, koma1, koma2, koma3, koma4)
-            VALUES (?, CURDATE(), 0, 0, 0, 0)
-        `;
-        await connection.execute(insertAttendanceQuery, [studentId]);
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        // 学校年度：4月〜翌年3月
+        const fiscalYearEnd = new Date(today.getMonth() >= 3 ? currentYear + 1 : currentYear, 2, 31);
+
+        // 登録日から年度末までの日数分ループ
+        for (
+            let d = new Date(today);
+            d <= fiscalYearEnd;
+            d.setDate(d.getDate() + 1)
+        ) {
+            const dateStr = d.toISOString().split("T")[0]; // YYYY-MM-DD
+
+            const insertAttendanceQuery = `
+                INSERT INTO \`${attendanceTable}\` 
+                (student_id, date, koma1, koma2, koma3, koma4)
+                VALUES (?, ?, 0, 0, 0, 0)
+            `;
+            await connection.execute(insertAttendanceQuery, [studentId, dateStr]);
+        }
 
         await connection.end();
 

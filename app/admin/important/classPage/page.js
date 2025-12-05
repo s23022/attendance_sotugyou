@@ -1,73 +1,41 @@
 "use client"
-import styles from './page.module.css'
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-
-// 人数ぶんのデータ（仮）
-const students = [
-    { id: "s25001", name: "山田太郎", email: "yamada@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25001", name: "山田太郎", email: "yamada@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-    { id: "s25002", name: "佐藤花子", email: "sato@example.com" },
-];
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import styles from './page.module.css';
 
 export default function ClassPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const table = searchParams.get("table"); // URL パラメータからテーブル名取得
 
+    const [students, setStudents] = useState([]);
+
+    // 管理者確認
     useEffect(() => {
-        // localStorage から role を取得
-        // 管理者ログイン時は "admin" を保存している前提
         const role = localStorage.getItem("role");
-
-        // role が admin でなければアクセス不可
         if (role !== "admin") {
-            alert("管理者ログインが必要です"); // 警告メッセージ
-            router.push("/admin"); // 管理者ログインページへリダイレクト
+            alert("管理者ログインが必要");
+            router.push("/admin");
         }
     }, []);
 
+    // データ取得
+    useEffect(() => {
+        if (!table) return;
+        fetch(`/api/getStudents?table=${table}`)
+            .then(res => {
+                if (!res.ok) { // レスポンスが正常でない場合
+                    throw new Error('Network response was not ok');
+                }
+                return res.json();
+            })
+            .then(data => setStudents(data))
+            .catch(err => console.error("データの取得に失敗しました:", err));
+    }, [table]);
     return (
         <main className={styles.Main}>
             <button className={styles.return_button} onClick={() => router.push("/admin/important")}>戻る</button>
             <div className={styles.matome}>
-
-                {/* 見出し */}
                 <ul className={styles.status}>
                     <li className={styles.status_title}>ID</li>
                     <li className={styles.status_title}>名前</li>
@@ -75,10 +43,9 @@ export default function ClassPage() {
                     <li className={styles.status_title}>出席詳細</li>
                 </ul>
 
-                {/* ↓ ここで人数ぶん自動で生成 */}
-                {students.map((student) => (
-                    <ul key={student.id} className={styles.status}>
-                        <li className={styles.status_title}>{student.id}</li>
+                {students.map(student => (
+                    <ul key={student.student_id  || student.id} className={styles.status}>
+                        <li className={styles.status_title}>{student.student_id  || student.id}</li>
                         <li className={styles.status_title}>{student.name}</li>
                         <li className={styles.status_title}>{student.email}</li>
                         <li className={styles.status_title}>
@@ -86,7 +53,6 @@ export default function ClassPage() {
                         </li>
                     </ul>
                 ))}
-
             </div>
         </main>
     );

@@ -27,18 +27,18 @@ export default function ClassPage() {
 
     // 仮データ：月ごとの遅刻回数と出席コマ数
     const monthSummary = {
-        "01": { late: 2, attendedKoma: 23, totalKoma: 24 },
-        "02": { late: 1, attendedKoma: 20, totalKoma: 22 },
-        "03": { late: 0, attendedKoma: 25, totalKoma: 25 },
-        "04": { late: 3, attendedKoma: 18, totalKoma: 24 },
-        "05": { late: 0, attendedKoma: 22, totalKoma: 22 },
-        "06": { late: 1, attendedKoma: 21, totalKoma: 24 },
-        "07": { late: 0, attendedKoma: 20, totalKoma: 20 },
-        "08": { late: 2, attendedKoma: 18, totalKoma: 20 },
-        "09": { late: 0, attendedKoma: 22, totalKoma: 22 },
-        "10": { late: 1, attendedKoma: 21, totalKoma: 24 },
-        "11": { late: 0, attendedKoma: 23, totalKoma: 24 },
-        "12": { late: 2, attendedKoma: 19, totalKoma: 24 },
+        "04": { late: 2, attendedKoma: 23, totalKoma: 24 },
+        "05": { late: 1, attendedKoma: 20, totalKoma: 22 },
+        "06": { late: 0, attendedKoma: 25, totalKoma: 25 },
+        "07": { late: 3, attendedKoma: 18, totalKoma: 24 },
+        "08": { late: 0, attendedKoma: 22, totalKoma: 22 },
+        "09": { late: 1, attendedKoma: 21, totalKoma: 24 },
+        "10": { late: 0, attendedKoma: 20, totalKoma: 20 },
+        "11": { late: 2, attendedKoma: 18, totalKoma: 20 },
+        "12": { late: 0, attendedKoma: 22, totalKoma: 22 },
+        "01": { late: 1, attendedKoma: 21, totalKoma: 24 },
+        "02": { late: 0, attendedKoma: 23, totalKoma: 24 },
+        "03": { late: 2, attendedKoma: 19, totalKoma: 24 },
     };
 
     return (
@@ -54,7 +54,7 @@ export default function ClassPage() {
 
                 {/* 月ボタン 1〜6月 */}
                 <div className={styles.M01_M06_button_summary}>
-                    {["01","02","03","04","05","06"].map((m) => (
+                    {["04","05","06","07","08","09"].map((m) => (
                         <div key={m} className={styles.month_block}>
                             <button
                                 className={styles.M01_06_button}
@@ -71,7 +71,7 @@ export default function ClassPage() {
 
                 {/* 月ボタン 7〜12月 */}
                 <div className={styles.M07_M12_button_summary}>
-                    {["07","08","09","10","11","12"].map((m) => (
+                    {["10","11","12","01","02","03"].map((m) => (
                         <div key={m} className={styles.month_block}>
                             <button
                                 className={styles.M07_12_button}

@@ -1,5 +1,5 @@
-"use client"
-import styles from './page.module.css'
+"use client";
+import styles from './page.module.css';
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -23,9 +23,6 @@ export default function Login() {
     const [year, setYear] = useState("");
 
     const handleRegister = async () => {
-        // ==========================
-        // 存在するテーブルにマッピング
-        // ==========================
         let tableName = "";
 
         if (department === "ITスペシャリスト科") {
@@ -59,29 +56,24 @@ export default function Login() {
     };
 
     const handleLogin = async () => {
-        const emailInput = document.querySelector(`.${styles.email}`).value;
-        const passwordInput = document.querySelector(`.${styles.password}`).value;
-
         const res = await fetch("/api/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: emailInput, password: passwordInput }),
+            body: JSON.stringify({ email, password }),
         });
 
         const result = await res.json();
 
         if (result.success) {
-            alert("ログイン成功！");
-            router.push("/"); // 出席管理画面へ
-            // ログイン成功（例）
             localStorage.setItem("userName", result.user.name);
             localStorage.setItem("userId", result.user.student_id);
-
+            localStorage.setItem("userClassGroup", result.user.table);
+            alert("ログイン成功！");
+            window.location.href = "/";
         } else {
             alert("ログイン失敗：" + result.message);
         }
     };
-
 
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [showRegisterModal, setShowRegisterModal] = useState(false);
@@ -92,24 +84,35 @@ export default function Login() {
 
     return (
         <>
-            {/* ログインボタン */}
             <div className={styles.login} onClick={toggleLoginModal}>ログイン</div>
 
-            {/* ログインモーダル */}
             {showLoginModal && (
                 <div className={styles.modalBackdrop}>
                     <div className={styles.modalContent}>
                         <h2 className={styles.login_title}>ログイン</h2>
-                        <input className={styles.email} type="email" placeholder="メールアドレス"/>
-                        <input className={styles.password} type="password" placeholder="パスワード"/>
+                        <input
+                            className={styles.email}
+                            type="email"
+                            placeholder="メールアドレス"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                        />
+                        <input
+                            className={styles.password}
+                            type="password"
+                            placeholder="パスワード"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                        />
                         <button className={styles.login_button} onClick={handleLogin}>ログイン</button>
-                        <p className={styles.registration_message}>登録を行ってない場合下記のボタンを押して下さい</p>
+                        <p className={styles.registration_message}>
+                            登録を行ってない場合下記のボタンを押して下さい
+                        </p>
                         <button className={styles.registration} onClick={openRegisterModal}>登録</button>
                     </div>
                 </div>
             )}
 
-            {/* 登録モーダル */}
             {showRegisterModal && (
                 <div className={styles.registration_modalBackdrop}>
                     <h2 className={styles.registration_login_title}>新規登録</h2>
@@ -120,52 +123,47 @@ export default function Login() {
                             type="text"
                             placeholder="例：s23022"
                             value={studentId}
-                            onChange={(e) => setStudentId(e.target.value)}
+                            onChange={e => setStudentId(e.target.value)}
                         />
-
                         <p>学年を入力してください（1 / 2 / 3）</p>
                         <input
                             className={styles.registration_cose}
                             type="number"
                             placeholder="例：1"
                             value={year}
-                            onChange={(e) => setYear(e.target.value)}
+                            onChange={e => setYear(e.target.value)}
                         />
-
                         <p>学校のメールアドレスを入力してください</p>
                         <input
                             className={styles.registration_email}
                             type="email"
                             placeholder="例：ITcollege@std.it-college.ac.jp"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={e => setEmail(e.target.value)}
                         />
-
                         <p>パスワードを入力してください</p>
                         <input
                             className={styles.registration_password}
                             type="password"
                             placeholder="例：password"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={e => setPassword(e.target.value)}
                         />
-
                         <p>名前を入力して下さい</p>
                         <input
                             className={styles.registration_name}
                             type="text"
                             placeholder="例：比嘉優太"
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={e => setName(e.target.value)}
                         />
-
                         <p>学科を入力してください</p>
                         <input
                             className={styles.registration_department}
                             type="text"
                             placeholder="例：ITスペシャリスト科"
                             value={department}
-                            onChange={(e) => setDepartment(e.target.value)}
+                            onChange={e => setDepartment(e.target.value)}
                         />
                     </div>
 

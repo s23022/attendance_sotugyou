@@ -19,7 +19,7 @@ export default function Home() {
     const [currentTime, setCurrentTime] = useState("");
 
     useEffect(() => {
-        setMounted(true); // SSR → CSR のタイミングズレ防止
+        setMounted(true);
 
         const timer = setInterval(() => {
             setCurrentTime(new Date().toLocaleTimeString());
@@ -30,17 +30,24 @@ export default function Home() {
 
 
     // ==========================
-    // ログインユーザー名の取得
+    // ログインユーザー管理
     // ==========================
-    const [userName, setUserName] = useState("");
+    const [loggedInStudent, setLoggedInStudent] = useState(null); // ← ここで state 管理
 
     useEffect(() => {
         const storedName = localStorage.getItem("userName");
-        if (storedName) {
-            setUserName(storedName);
-        }
-    }, []);
+        const storedId = localStorage.getItem("userId");
+        const storedClass = localStorage.getItem("userClassGroup"); // Attendance用
 
+        if (storedName && storedId && storedClass) {
+            setLoggedInStudent({
+                studentId: storedId,
+                name: storedName,
+                classGroup: storedClass
+            });
+        }
+
+    }, []);
 
 
     // ==========================
@@ -52,41 +59,45 @@ export default function Home() {
         if (confirmed) {
             localStorage.removeItem("userName");
             localStorage.removeItem("userId");
+            localStorage.removeItem("userClassGroup");
 
-            setUserName("");
-
+            setLoggedInStudent(null); // ← Attendanceに反映
             alert("ログアウトしました");
         }
     };
 
 
-    // ==========================
-    // レンダリング
-    // ==========================
     return (
         <main className={styles.Main}>
             {/*管理者ページ*/}
             <button className={styles.admin} onClick={() => router.push("/admin")}>
                 管理者
             </button>
+
             {/*ログイン・登録*/}
-            <Login />
+            <Login setLoggedInStudent={setLoggedInStudent} /> {/* Login から state 更新 */}
+
             {/*出席管理についての説明*/}
             <Explanation />
+
             {/*月日*/}
             <Days />
+
             {/* 現在時刻表示 */}
             {mounted && (
                 <div className={styles.time}>{currentTime}</div>
             )}
+
             {/*出席*/}
-            <Attendance />
+            <Attendance loggedInStudent={loggedInStudent} /> {/* ← ここに渡す */}
+
             <div className={styles.user}>
                 <p>現在ログインしているユーザー</p>
-                <p className={styles.user_name}>{userName ? userName : "　"}</p>
+                <p className={styles.user_name}>{loggedInStudent?.name || "　"}</p>
             </div>
+
             {/* ログアウト（ログイン時のみ表示） */}
-            {userName && (
+            {loggedInStudent && (
                 <p className={styles.logout} onClick={handleLogout}>
                     ログアウトする
                 </p>
