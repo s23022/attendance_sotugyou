@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from './page.module.css';
@@ -6,11 +6,13 @@ import styles from './page.module.css';
 export default function ClassPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const table = searchParams.get("table"); // URL パラメータからテーブル名取得
+
+    // router.push({ pathname, query }) に完全対応した取得
+    const table = searchParams.get("table");
 
     const [students, setStudents] = useState([]);
 
-    // 管理者確認
+    // 管理者チェック
     useEffect(() => {
         const role = localStorage.getItem("role");
         if (role !== "admin") {
@@ -22,19 +24,31 @@ export default function ClassPage() {
     // データ取得
     useEffect(() => {
         if (!table) return;
+
         fetch(`/api/getStudents?table=${table}`)
             .then(res => {
-                if (!res.ok) { // レスポンスが正常でない場合
-                    throw new Error('Network response was not ok');
+                if (!res.ok) {
+                    throw new Error("Network response was not ok");
                 }
                 return res.json();
             })
-            .then(data => setStudents(data))
-            .catch(err => console.error("データの取得に失敗しました:", err));
+            .then(data => {
+                // data が配列として返ってくる前提
+                setStudents(Array.isArray(data) ? data : []);
+            })
+            .catch(err => console.error("データ取得失敗:", err));
     }, [table]);
+
+
     return (
         <main className={styles.Main}>
-            <button className={styles.return_button} onClick={() => router.push("/admin/important")}>戻る</button>
+            <button
+                className={styles.return_button}
+                onClick={() => router.push("/admin/important")}
+            >
+                戻る
+            </button>
+
             <div className={styles.matome}>
                 <ul className={styles.status}>
                     <li className={styles.status_title}>ID</li>
@@ -44,12 +58,34 @@ export default function ClassPage() {
                 </ul>
 
                 {students.map(student => (
-                    <ul key={student.student_id  || student.id} className={styles.status}>
-                        <li className={styles.status_title}>{student.student_id  || student.id}</li>
+                    <ul
+                        key={student.student_id ?? student.id}
+                        className={styles.status}
+                    >
+                        <li className={styles.status_title}>
+                            {student.student_id ?? student.id}
+                        </li>
                         <li className={styles.status_title}>{student.name}</li>
                         <li className={styles.status_title}>{student.email}</li>
+
                         <li className={styles.status_title}>
-                            <button className={styles.syousai_button}>詳細</button>
+                            <button
+                                className={styles.syousai_button}
+                                onClick={() =>
+                                    router.push({
+                                        pathname:
+                                            "/admin/important/classPage/syousai/attendance_situation",
+                                        query: {
+                                            studentId:
+                                                student.student_id ??
+                                                student.id,
+                                            month: "01",
+                                        },
+                                    })
+                                }
+                            >
+                                詳細
+                            </button>
                         </li>
                     </ul>
                 ))}

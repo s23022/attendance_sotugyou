@@ -19,7 +19,7 @@ export async function GET(req) {
 
     try {
         const connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.execute(`SELECT student_id, name, email FROM \`${table}\``);
+        const [rows] = await connection.execute(`SELECT id, student_id, name, email FROM \`${table}\``);
         await connection.end();
 
         return new Response(JSON.stringify(rows), { status: 200 });
