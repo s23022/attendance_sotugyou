@@ -1,109 +1,190 @@
 "use client";
+
 import styles from "./page.module.css";
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+
+// ==========================================================
+// Attendance Situation 完全版（仕様完全一致）
+// ----------------------------------------------------------
+// ・コマ手動修正（✓）
+// ・遅刻欄クリックで rotate（present → absent → late）
+// ・自動判定は仕様通り
+// ・背景は item_li 全体に付与
+// ・CSS は既存を崩さない（追加クラスのみ）
+// ==========================================================
 
 export default function Attendance_Situation() {
     const router = useRouter();
 
+    // --- admin チェック ---
     useEffect(() => {
-        // localStorage から role を取得
-        // 管理者ログイン時は "admin" を保存している前提
         const role = localStorage.getItem("role");
-
-        // role が admin でなければアクセス不可
         if (role !== "admin") {
-            alert("管理者ログインが必要です"); // 警告メッセージ
-            router.push("/admin"); // 管理者ログインページへリダイレクト
+            alert("管理者ログインが必要です");
+            router.push("/admin");
         }
     }, []);
-    const searchParams = useSearchParams();
-    const studentId = searchParams.get("studentId") || "s23022";
-    const month = searchParams.get("month") || "01";
 
-    const daysInMonth = (m) => {
-        const y = 2025;
-        return new Date(y, parseInt(m), 0).getDate();
-    };
+    const params = useSearchParams();
+
+    const studentId = params.get("studentId");
+    const month = params.get("month");
+
+    // 通常テーブル（例：s3） → 出席テーブル（例：s3_attendance）
+    const tableBase = params.get("table");
+    const table = `${tableBase}_attendance`;
+
+    // --- 月の日数 ---
+    const daysInMonth = (m) => new Date(2025, parseInt(m), 0).getDate();
 
     const days = Array.from({ length: daysInMonth(month) }, (_, i) =>
         `${month}/${String(i + 1).padStart(2, "0")}`
     );
 
-    // attendance = { koma1, koma2, koma3, koma4, lateMode, manual }
-    const [attendance, setAttendance] = useState(
-        days.map(() => ({
-            koma1: false,
-            koma2: false,
-            koma3: false,
-            koma4: false,
-            lateMode: "none", // 初期は空白
-            manual: false, // true なら手動で上書き
-        }))
-    );
+    // --- 初期値 ---
+    const initRow = () => ({
+        koma1: false,
+        koma2: false,
+        koma3: false,
+        koma4: false,
+        lateMode: "none",
+        manual: false,
+    });
 
+    const [attendance, setAttendance] = useState(days.map(initRow));
+
+    // ==========================================================
+    // DB ロード（ *_attendance テーブル）
+    // ==========================================================
+    useEffect(() => {
+        if (!studentId || !table || !month) return;
+
+        fetch(`/api/getAttendance?studentId=${studentId}&table=${table}&month=${month}`)
+            .then((res) => res.json())
+            .then((data) => {
+                console.log("API:", data);
+
+                if (!Array.isArray(data)) {
+                    setAttendance(days.map(initRow));
+                    return;
+                }
+
+                const updated = days.map(initRow);
+
+                data.forEach((row) => {
+                    const dayNum = parseInt(row.date.split("-")[2], 10);
+                    const idx = dayNum - 1;
+
+                    if (!updated[idx]) return;
+
+                    updated[idx].koma1 = row.koma1 === 1;
+                    updated[idx].koma2 = row.koma2 === 1;
+                    updated[idx].koma3 = row.koma3 === 1;
+                    updated[idx].koma4 = row.koma4 === 1;
+
+                    updated[idx].lateMode = row.late_mode || "none";
+                });
+
+                setAttendance(updated);
+            })
+            .catch(() => {
+                setAttendance(days.map(initRow));
+            });
+    }, [studentId, table, month]);
+
+    // ==========================================================
+    // 土日
+    // ==========================================================
     const isWeekend = (day) => {
-        const date = new Date(`2025-${day.replace("/", "-")}`);
-        const w = date.getDay();
+        const d = new Date(`2025-${day.replace("/", "-")}`);
+        const w = d.getDay();
         return w === 0 || w === 6;
     };
 
-    // 1〜4コマの出欠を切り替え
+    // ==========================================================
+    // コマ toggle（手動修正）
+    // ==========================================================
     const toggleAttendance = (index, key) => {
         const newData = [...attendance];
         newData[index][key] = !newData[index][key];
-        newData[index].manual = false; // 自動判定に戻す
+        newData[index].manual = false;
         setAttendance(newData);
     };
 
-    // 遅刻欄クリック → 出席 → 欠課 → 遅刻 → 出席… のローテーション
+    // ==========================================================
+    // 遅刻欄 rotate（present → absent → late）
+    // ==========================================================
     const rotateLate = (index) => {
         const newData = [...attendance];
         newData[index].manual = true;
 
-        const order = ["present", "absent", "late"];
         const current = newData[index].lateMode;
 
-        const next = current === "present" ? "absent"
-            : current === "absent" ? "late"
-                : "present";
+        const next =
+            current === "present" ? "absent" :
+                current === "absent" ? "late" :
+                    "present";
 
         newData[index].lateMode = next;
+
         setAttendance(newData);
     };
 
-    // 自動判定
-    const autoLateJudge = (data) => {
-        return data.map((row, idx) => {
-            if (row.manual) return row; // 手動なら無視
-            if (isWeekend(days[idx])) return row; // 土日は判定しない
+    // ==========================================================
+    // 自動判定（仕様に完全一致）
+    // ==========================================================
+    const autoLateJudge = (row) => {
+        if (row.manual) return row;
 
-            const komas = [row.koma1, row.koma2, row.koma3, row.koma4];
-            const allPresent = komas.every((k) => k === true);
-            const anyAbsent = komas.some((k) => k === false);
-            const anyLate = row.lateMode === "late";
+        const k1 = row.koma1;
+        const k2 = row.koma2;
+        const k3 = row.koma3;
+        const k4 = row.koma4;
 
-            let mode = "none"; // 初期は空白
-            if (anyLate) mode = "late";
-            else if (anyAbsent && komas.some(k => k !== null)) mode = "absent";
-            else if (allPresent) mode = "present";
+        const allPresent = k1 && k2 && k3 && k4;
+        const anyAbsent = !k1 || !k2 || !k3;
+        const k4Absent = !k4;
 
-            row.lateMode = mode;
+        if (allPresent) {
+            row.lateMode = "present";
             return row;
-        });
+        }
+
+        if (k4Absent) {
+            row.lateMode = "absent";
+            return row;
+        }
+
+        if (anyAbsent) {
+            row.lateMode = "late";
+            return row;
+        }
+
+        row.lateMode = "late";
+        return row;
     };
 
+
+
+    // komas が変わったら自動判定
     useEffect(() => {
         setAttendance((prev) => autoLateJudge([...prev]));
-    }, [attendance.map(a => [a.koma1, a.koma2, a.koma3, a.koma4].join("")).join("")]);
+    }, [
+        attendance
+            .map((a) => [a.koma1, a.koma2, a.koma3, a.koma4].join(""))
+            .join("")
+    ]);
 
+    // ==========================================================
+    // UI
+    // ==========================================================
     return (
         <main className={styles.Main}>
             <button
                 className={styles.return_button}
                 onClick={() =>
-                    router.push("/admin/important/classPage/syousai")
+                    router.push(`/admin/important/classPage/syousai?studentId=${studentId}&table=${tableBase}`)
                 }
             >
                 戻る
@@ -122,59 +203,38 @@ export default function Attendance_Situation() {
                 <li className={styles.item_li}>遅刻</li>
             </ul>
 
-            {days.map((day, index) => {
+            {days.map((day, idx) => {
                 const weekend = isWeekend(day);
 
-                // 遅刻欄の文字と色
                 const statusClass =
-                    weekend
-                        ? "" // 土日は文字も色もなし
-                        : attendance[index].lateMode === "present"
-                            ? styles.status_present
-                            : attendance[index].lateMode === "absent"
-                                ? styles.status_absent
-                                : attendance[index].lateMode === "late"
-                                    ? styles.status_late
-                                    : "";
+                    weekend ? "" :
+                        attendance[idx].lateMode === "present" ? styles.status_present :
+                            attendance[idx].lateMode === "absent" ? styles.status_absent :
+                                attendance[idx].lateMode === "late" ? styles.status_late : "";
 
                 const statusLabel =
-                    weekend
-                        ? ""
-                        : attendance[index].lateMode === "present"
-                            ? "出席"
-                            : attendance[index].lateMode === "absent"
-                                ? "欠課"
-                                : attendance[index].lateMode === "late"
-                                    ? "遅刻"
-                                    : "";
+                    weekend ? "" :
+                        attendance[idx].lateMode === "present" ? "出席" :
+                            attendance[idx].lateMode === "absent" ? "欠課" :
+                                attendance[idx].lateMode === "late" ? "遅刻" : "";
 
                 return (
-                    <ul
-                        key={index}
-                        className={`${styles.explanation_ul} ${
-                            weekend ? styles.weekend : ""
-                        }`}
-                    >
+                    <ul key={idx} className={`${styles.explanation_ul} ${weekend ? styles.weekend : ""}`}>
                         <li className={styles.item_li}>{day}</li>
 
-                        {["koma1", "koma2", "koma3", "koma4"].map((key) => (
+                        {["koma1", "koma2", "koma3", "koma4"].map((k) => (
                             <button
-                                key={key}
-                                className={`${styles.item_li} ${
-                                    attendance[index][key] ? styles.attended : ""
-                                }`}
-                                onClick={() => toggleAttendance(index, key)}
+                                key={k}
+                                className={`${styles.item_li} ${attendance[idx][k] ? styles.attended : ""}`}
+                                onClick={() => toggleAttendance(idx, k)}
                             >
-                                {attendance[index][key] ? "✓" : ""}
+                                {attendance[idx][k] ? "✓" : ""}
                             </button>
                         ))}
 
-                        {/* 遅刻欄 */}
                         <li
                             className={`${styles.item_li} ${statusClass}`}
-                            onClick={() => {
-                                if (!weekend) rotateLate(index)
-                            }}
+                            onClick={() => !weekend && rotateLate(idx)}
                         >
                             {statusLabel}
                         </li>

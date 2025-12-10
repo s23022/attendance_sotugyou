@@ -52,6 +52,18 @@
     font-size: 20px;
 }
 
+.jouhou_02 {
+    position: relative;
+    width: 400px;
+    height: 100px;
+    margin-right: 10px;
+    margin-left: 10px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    font-size: 20px;
+}
+
 .M01_M06_button_summary {
     position: relative;
     display: flex;

@@ -7,8 +7,7 @@ export default function ClassPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    // router.push({ pathname, query }) に完全対応した取得
-    const table = searchParams.get("table");
+    const table = searchParams.get("table"); // ← OK
 
     const [students, setStudents] = useState([]);
 
@@ -27,18 +26,12 @@ export default function ClassPage() {
 
         fetch(`/api/getStudents?table=${table}`)
             .then(res => {
-                if (!res.ok) {
-                    throw new Error("Network response was not ok");
-                }
+                if (!res.ok) throw new Error("Network Error");
                 return res.json();
             })
-            .then(data => {
-                // data が配列として返ってくる前提
-                setStudents(Array.isArray(data) ? data : []);
-            })
+            .then(data => setStudents(Array.isArray(data) ? data : []))
             .catch(err => console.error("データ取得失敗:", err));
     }, [table]);
-
 
     return (
         <main className={styles.Main}>
@@ -57,38 +50,30 @@ export default function ClassPage() {
                     <li className={styles.status_title}>出席詳細</li>
                 </ul>
 
-                {students.map(student => (
-                    <ul
-                        key={student.student_id ?? student.id}
-                        className={styles.status}
-                    >
-                        <li className={styles.status_title}>
-                            {student.student_id ?? student.id}
-                        </li>
-                        <li className={styles.status_title}>{student.name}</li>
-                        <li className={styles.status_title}>{student.email}</li>
+                {students.map(student => {
+                    const sid = student.student_id ?? student.id;
 
-                        <li className={styles.status_title}>
-                            <button
-                                className={styles.syousai_button}
-                                onClick={() =>
-                                    router.push({
-                                        pathname:
-                                            "/admin/important/classPage/syousai/attendance_situation",
-                                        query: {
-                                            studentId:
-                                                student.student_id ??
-                                                student.id,
-                                            month: "01",
-                                        },
-                                    })
-                                }
-                            >
-                                詳細
-                            </button>
-                        </li>
-                    </ul>
-                ))}
+                    return (
+                        <ul key={sid} className={styles.status}>
+                            <li className={styles.status_title}>{sid}</li>
+                            <li className={styles.status_title}>{student.name}</li>
+                            <li className={styles.status_title}>{student.email}</li>
+
+                            <li className={styles.status_title}>
+                                <button
+                                    className={styles.syousai_button}
+                                    onClick={() =>
+                                        router.push(
+                                            `/admin/important/classPage/syousai?studentId=${student.student_id}&table=${table}`
+                                        )
+                                    }
+                                >
+                                    詳細
+                                </button>
+                            </li>
+                        </ul>
+                    );
+                })}
             </div>
         </main>
     );
