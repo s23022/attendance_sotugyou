@@ -29,7 +29,16 @@ export default function ClassPage() {
                 if (!res.ok) throw new Error("Network Error");
                 return res.json();
             })
-            .then(data => setStudents(Array.isArray(data) ? data : []))
+            .then(data => {
+                // ★ IDの末尾2桁でソート
+                const sorted = [...data].sort((a, b) => {
+                    const numA = parseInt(a.student_id.slice(-2));
+                    const numB = parseInt(b.student_id.slice(-2));
+                    return numA - numB;
+                });
+
+                setStudents(sorted);
+            })
             .catch(err => console.error("データ取得失敗:", err));
     }, [table]);
 
