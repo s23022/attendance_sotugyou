@@ -1,14 +1,11 @@
 "use client";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from './page.module.css';
 
 export default function ClassPage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
-
-    const table = searchParams.get("table"); // ← OK
-
+    const [table, setTable] = useState(null);
     const [students, setStudents] = useState([]);
 
     // 管理者チェック
@@ -16,8 +13,14 @@ export default function ClassPage() {
         const role = localStorage.getItem("role");
         if (role !== "admin") {
             alert("管理者ログインが必要");
-            router.push("/admin");
+            router.push("/admin/important");
         }
+    }, [router]);
+
+    // URLパラメータ取得（クライアント側）
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        setTable(params.get("table"));
     }, []);
 
     // データ取得
@@ -30,13 +33,11 @@ export default function ClassPage() {
                 return res.json();
             })
             .then(data => {
-                // ★ IDの末尾2桁でソート
                 const sorted = [...data].sort((a, b) => {
                     const numA = parseInt(a.student_id.slice(-2));
                     const numB = parseInt(b.student_id.slice(-2));
                     return numA - numB;
                 });
-
                 setStudents(sorted);
             })
             .catch(err => console.error("データ取得失敗:", err));
@@ -61,19 +62,17 @@ export default function ClassPage() {
 
                 {students.map(student => {
                     const sid = student.student_id ?? student.id;
-
                     return (
                         <ul key={sid} className={styles.status}>
                             <li className={styles.status_title}>{sid}</li>
                             <li className={styles.status_title}>{student.name}</li>
                             <li className={styles.status_title}>{student.email}</li>
-
                             <li className={styles.status_title}>
                                 <button
                                     className={styles.syousai_button}
                                     onClick={() =>
                                         router.push(
-                                            `/admin/important/classPage/syousai?studentId=${student.student_id}&table=${table}`
+                                            `/admin/important/classPage/syousai?studentId=${sid}&table=${table}`
                                         )
                                     }
                                 >

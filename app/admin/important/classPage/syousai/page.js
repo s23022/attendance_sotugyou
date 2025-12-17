@@ -1,19 +1,29 @@
 "use client";
 
 import styles from "./page.module.css";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ClassPage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
 
-    // 一覧ページから渡された値
-    const studentId = searchParams.get("studentId");       // ← student_id
-    const table = searchParams.get("table");               // ← 例: s3
-    const month = searchParams.get("month");
+    const [searchParams, setSearchParams] = useState(null);
+    const [studentId, setStudentId] = useState(null);
+    const [table, setTable] = useState(null);
+    const [month, setMonth] = useState(null);
 
     const [student, setStudent] = useState(null);
+
+    // ------------------------------
+    // クライアントで searchParams を取得
+    // ------------------------------
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        setSearchParams(params);
+        setStudentId(params.get("studentId"));
+        setTable(params.get("table"));
+        setMonth(params.get("month"));
+    }, []);
 
     // ------------------------------
     // 管理者チェック
@@ -67,13 +77,12 @@ export default function ClassPage() {
         );
     };
 
+    if (!studentId || !table) return <p>読み込み中...</p>; // searchParams がまだ取得されていない場合
+
     return (
         <main className={styles.Main}>
             <div className={styles.matome}>
-
-                <h1 className={styles.students_ID}>
-                    {studentId}
-                </h1>
+                <h1 className={styles.students_ID}>{studentId}</h1>
 
                 {/* 生徒情報 */}
                 <ul className={styles.jouhou}>
@@ -126,7 +135,32 @@ export default function ClassPage() {
                     戻る
                 </button>
 
-                <button className={styles.deth}>削除</button>
+                <button
+                    className={styles.deth}
+                    onClick={async () => {
+                        if (!confirm("本当に削除しますか？")) return;
+
+                        try {
+                            const res = await fetch("/api/deleteStudent", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ studentId, table })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert("削除しました");
+                                router.push(`/admin/important/classPage?table=${table}`);
+                            } else {
+                                alert(data.message || "削除に失敗しました");
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            alert("サーバーエラー");
+                        }
+                    }}
+                >
+                    削除
+                </button>
             </div>
         </main>
     );

@@ -2,24 +2,41 @@
 
 import styles from "./page.module.css";
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 // ==========================================================
-// Attendance Situation 修正版
-// ・各コマ: 出席 / 遅刻 / 欠課 を文字列で管理
-// ・遅刻欄: 新ルールで判定
-// ・管理者クリックで切替: 出席 → 遅刻 → 欠課
-// ・背景色追加（出席:薄緑 / 遅刻:薄赤 / 欠課:薄青）
+// Attendance Situation 修正版 (ビルド通る版)
 // ==========================================================
-
-export default function Attendance_Situation() {
+export default function AttendanceSituation() {
     const router = useRouter();
-    const params = useSearchParams();
 
-    const studentId = params.get("studentId");
-    const month = params.get("month");
-    const tableBase = params.get("table");
-    const table = `${tableBase}_attendance`;
+    const [studentId, setStudentId] = useState(null);
+    const [month, setMonth] = useState(null);
+    const [tableBase, setTableBase] = useState(null);
+    const [attendance, setAttendance] = useState([]);
+    const [days, setDays] = useState([]);
+
+    // --- クエリ取得 ---
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const sid = params.get("studentId");
+        const m = params.get("month");
+        const t = params.get("table");
+
+        setStudentId(sid);
+        setMonth(m);
+        setTableBase(t);
+
+        if (m) {
+            const daysInMonth = new Date(2025, parseInt(m), 0).getDate();
+            const daysArr = Array.from({ length: daysInMonth }, (_, i) =>
+                `${m}/${String(i + 1).padStart(2, "0")}`
+            );
+            setDays(daysArr);
+        }
+    }, []);
+
+    const table = tableBase ? `${tableBase}_attendance` : null;
 
     // --- admin チェック ---
     useEffect(() => {
@@ -28,15 +45,9 @@ export default function Attendance_Situation() {
             alert("管理者ログインが必要です");
             router.push("/admin");
         }
-    }, []);
+    }, [router]);
 
-    // --- 月の日数 ---
-    const daysInMonth = (m) => new Date(2025, parseInt(m), 0).getDate();
-    const days = Array.from({ length: daysInMonth(month) }, (_, i) =>
-        `${month}/${String(i + 1).padStart(2, "0")}`
-    );
-
-    // --- 初期値 ---
+    // --- 初期値関数 ---
     const initRow = () => ({
         koma1: "absent",
         koma2: "absent",
@@ -45,63 +56,47 @@ export default function Attendance_Situation() {
         manual: false,
     });
 
-    const [attendance, setAttendance] = useState(days.map(initRow));
-
-    // ==========================================================
-    // DBロード
-    // ==========================================================
+    // --- DBロード ---
     useEffect(() => {
-        if (!studentId || !table || !month) return;
+        if (!studentId || !month || !table || days.length === 0) return;
 
         fetch(`/api/getAttendance?studentId=${studentId}&table=${table}&month=${month}`)
             .then(res => res.json())
             .then(data => {
-                if (!Array.isArray(data)) {
-                    setAttendance(days.map(initRow));
-                    return;
-                }
-
                 const updated = days.map(initRow);
 
-                const convertStatus = (v) => {
-                    if (v === 1) return "present";
-                    if (v === 2) return "late";
-                    return "absent";
-                };
+                if (Array.isArray(data)) {
+                    const convertStatus = (v) => (v === 1 ? "present" : v === 2 ? "late" : "absent");
 
-                data.forEach(row => {
-                    const dayNum = parseInt(row.date.split("-")[2], 10);
-                    const idx = dayNum - 1;
-                    if (!updated[idx]) return;
+                    data.forEach(row => {
+                        const dayNum = parseInt(row.date.split("-")[2], 10);
+                        const idx = dayNum - 1;
+                        if (!updated[idx]) return;
 
-                    updated[idx].koma1 = convertStatus(row.koma1);
-                    updated[idx].koma2 = convertStatus(row.koma2);
-                    updated[idx].koma3 = convertStatus(row.koma3);
-                    updated[idx].koma4 = convertStatus(row.koma4);
-                });
+                        updated[idx].koma1 = convertStatus(row.koma1);
+                        updated[idx].koma2 = convertStatus(row.koma2);
+                        updated[idx].koma3 = convertStatus(row.koma3);
+                        updated[idx].koma4 = convertStatus(row.koma4);
+                    });
+                }
 
                 setAttendance(updated);
             })
             .catch(() => setAttendance(days.map(initRow)));
-    }, [studentId, table, month]);
+    }, [studentId, month, table, days]);
 
-    // ==========================================================
-    // 土日判定
-    // ==========================================================
+    // --- 土日判定 ---
     const isWeekend = (day) => {
         const d = new Date(`2025-${day.replace("/", "-")}`);
         const w = d.getDay();
         return w === 0 || w === 6;
     };
 
-    // ==========================================================
-    // コマクリック切替
-    // ==========================================================
+    // --- コマクリック切替 ---
     const toggleKoma = (index, key) => {
         const newData = [...attendance];
         const current = newData[index][key];
 
-        // 出席 → 遅刻 → 欠課 → 出席
         newData[index][key] =
             current === "present" ? "late" :
                 current === "late" ? "absent" :
@@ -111,19 +106,15 @@ export default function Attendance_Situation() {
         setAttendance(newData);
     };
 
-    // ==========================================================
-    // 遅刻欄判定
-    // ==========================================================
+    // --- 遅刻判定 ---
     const judgeSummary = (row) => {
         const k = [row.koma1, row.koma2, row.koma3, row.koma4];
-
-        if (k[3] === "absent") return "absent";              // 4コマ欠課は欠課優先
-        if (k[3] === "late") return "late";                  // 4コマ遅刻は遅刻
-        if (k.slice(0,3).includes("late") || k.slice(0,3).includes("absent")) return "late"; // 1〜3コマの欠課・遅刻
-        if (k.every(v => v === "present")) return "present"; // 全出席
-        return "present"; // 念のための保険
+        if (k[3] === "absent") return "absent";
+        if (k[3] === "late") return "late";
+        if (k.slice(0,3).includes("late") || k.slice(0,3).includes("absent")) return "late";
+        if (k.every(v => v === "present")) return "present";
+        return "present";
     };
-
 
     const summaryLabel = (row) => {
         const summary = judgeSummary(row);
@@ -134,20 +125,18 @@ export default function Attendance_Situation() {
 
     const komaLabel = (status) =>
         status === "present" ? "出席" :
-            status === "late"    ? "遅刻" :
+            status === "late" ? "遅刻" :
                 "欠課";
 
-    const statusClass = (status, isWeekend) => {
-        if (isWeekend) return styles.weekend; // 土日は文字非表示・オレンジ背景
+    const statusClass = (status, weekend) => {
+        if (weekend) return styles.weekend;
         if (status === "present") return styles.bg_present;
         if (status === "late") return styles.bg_late;
         if (status === "absent") return styles.bg_absent;
         return "";
     };
 
-    // ==========================================================
-    // UI
-    // ==========================================================
+    // --- UI ---
     return (
         <main className={styles.Main}>
             <button
@@ -182,15 +171,15 @@ export default function Attendance_Situation() {
                         {["koma1","koma2","koma3","koma4"].map(k => (
                             <li
                                 key={k}
-                                className={`${styles.item_li} ${statusClass(attendance[idx][k], weekend)}`}
+                                className={`${styles.item_li} ${statusClass(attendance[idx]?.[k], weekend)}`}
                                 onClick={() => toggleKoma(idx,k)}
                             >
-                                {!weekend && komaLabel(attendance[idx][k])}
+                                {!weekend && komaLabel(attendance[idx]?.[k] ?? "absent")}
                             </li>
                         ))}
 
-                        <li className={`${styles.item_li} ${statusClass(judgeSummary(attendance[idx]), weekend)}`}>
-                            {!weekend && summaryLabel(attendance[idx])}
+                        <li className={`${styles.item_li} ${statusClass(judgeSummary(attendance[idx] ?? initRow()), weekend)}`}>
+                            {!weekend && summaryLabel(attendance[idx] ?? initRow())}
                         </li>
                     </ul>
                 );

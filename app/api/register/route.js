@@ -39,15 +39,16 @@ export async function POST(req) {
 
         const today = new Date();
         const currentYear = today.getFullYear();
-        // 学校年度：4月〜翌年3月
-        const fiscalYearEnd = new Date(today.getMonth() >= 3 ? currentYear + 1 : currentYear, 2, 31);
 
-        // 登録日から年度末までの日数分ループ
-        for (
-            let d = new Date(today);
-            d <= fiscalYearEnd;
-            d.setDate(d.getDate() + 1)
-        ) {
+        // 学校年度の開始と終了
+        const fiscalStart = new Date(currentYear, 3, 1); // 4月1日
+        const fiscalEnd = new Date(currentYear + 1, 2, 31); // 翌年3月31日
+
+        // 生成開始日：今日が4〜12月なら今年4月、1〜3月なら前年4月
+        const startYear = today.getMonth() >= 3 ? currentYear : currentYear - 1;
+        const startDate = new Date(startYear, 3, 1);
+
+        for (let d = new Date(startDate); d <= fiscalEnd; d.setDate(d.getDate() + 1)) {
             const dateStr = d.toISOString().split("T")[0]; // YYYY-MM-DD
 
             const insertAttendanceQuery = `
