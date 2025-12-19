@@ -12,7 +12,7 @@ export default function AdminPage() {
 
     const handleSubmit = () => {
         // 仮の管理者アカウント
-        const adminEmail = "admin@itcollege.com";
+        const adminEmail = "admin";
         const adminPassword = "admin";
 
         if (email === adminEmail && password === adminPassword) {
